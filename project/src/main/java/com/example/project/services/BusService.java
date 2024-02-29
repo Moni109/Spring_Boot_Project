@@ -2,7 +2,12 @@ package com.example.project.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import com.example.project.model.BusDetails;
 import com.example.project.repository.BusRepository;
 
@@ -27,39 +32,49 @@ public class BusService {
         }
     }
 
-    public BusDetails updateBusDetails(BusDetails updatedBusDetails){
-        int id = updatedBusDetails.getBus_id();
-        BusDetails existingBusDetails = busRepository.findById(id).orElse(null);
+     public BusDetails getByBusId(int id){
+        return busRepository.findById(id).orElse(null);
+    }
+    
+    public BusDetails updateBusDetails(int id,BusDetails updatedBusDetails){
         
-        if(existingBusDetails != null){
-            existingBusDetails.setBus_Name(updatedBusDetails.getBus_Name());
-            existingBusDetails.setDeparture_time(updatedBusDetails.getDeparture_time());
-            existingBusDetails.setArrival_time(updatedBusDetails.getArrival_time());
-            existingBusDetails.setBus_type(updatedBusDetails.getBus_type());
-            existingBusDetails.setSeats_available(updatedBusDetails.getSeats_available());
-            existingBusDetails.setPrice(updatedBusDetails.getPrice());
-            existingBusDetails.setStatus(updatedBusDetails.getStatus());
-            existingBusDetails.setSource(updatedBusDetails.getSource());
-            existingBusDetails.setDestination(updatedBusDetails.getDestination());
-
-            return busRepository.save(existingBusDetails);
+        boolean ID = busRepository.existsById(id);
+        if(ID){
+            updatedBusDetails.setBusid(id);
+            return busRepository.save(updatedBusDetails);
+        }
+        else{
+            throw new IllegalArgumentException("busDetails cannot be null");
+        } 
+    }
+    
+    public boolean deleteBusDetails(int id) {
+        if (busRepository.existsById(id)) {
+            busRepository.deleteById(id);
+            return true;
         } 
         else {
-            throw new IllegalArgumentException("Bus with id " + id + " not found");
+            return false;
         }
     }
     
-    public void deleteBusDetails(BusDetails deletedBusDetails){
-        int id = deletedBusDetails.getBus_id();
-        if(busRepository.existsById(id)){
-            busRepository.deleteById(id);
-        } 
-        else {
-            throw new IllegalArgumentException("Bus with id"+ id + "not found");
-        }
+
+    public List<BusDetails> sortTheDetails(String field){
+        return busRepository.findAll(Sort.by(field));
+    }
+
+    public Page<BusDetails> sortPages(int offset,int pageSize){
+        Pageable pageable = PageRequest.of(offset, pageSize);
+        return busRepository.findAll(pageable);
+    }
+
+    public List<BusDetails> sortByBoth(int offset, int pageSize, String field){
+        Pageable pageable= PageRequest.of(offset, pageSize, Sort.by(field));
+        return busRepository.findAll(pageable).getContent();
     }
 
     public List<BusDetails> findBusesBySourceAndDestination(String source, String destination) {
         return busRepository.findBusesBySourceAndDestination(source, destination);
     }
+
 }

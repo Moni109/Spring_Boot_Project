@@ -1,8 +1,6 @@
 package com.example.project.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -10,7 +8,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,24 +19,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BusDetails {
+public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int busid ;
-    private String busName;
-    private LocalDateTime departure_time;
-    private LocalDateTime arrival_time;
-    private String bustype;
-    private int seats_available;
-    private int price;
-    private String status;
+    private int tid;
+    private String passengerName;
     private String source;
     private String destination;
+    private int price;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "busDetails",cascade = CascadeType.ALL)
-    private List<Ticket> tickets;
-    
-    
-    
+
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "bus_ID")
+    private BusDetails busDetails;
+
 }
